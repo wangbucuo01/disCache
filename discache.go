@@ -47,7 +47,7 @@ var (
 
 func NewGroup(name string, cacheBytes int64, getter Getter) *Group {
 	if getter == nil {
-		panic("nil Getter!")
+		panic("nil Getter")
 	}
 	mu.Lock()
 	defer mu.Unlock()
