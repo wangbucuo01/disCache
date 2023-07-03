@@ -1,6 +1,9 @@
 package lru
 
-import "testing"
+import (
+	"reflect"
+	"testing"
+)
 
 type String string
 
