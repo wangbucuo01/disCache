@@ -2,10 +2,14 @@ package lru
 
 import "container/list"
 
+/*
+ LRU缓存淘汰策略
+*/
+
 // list.List实现了一个双向链表
 // Cache底层是一个双向链表+map
 type Cache struct {
-	ll *list.List
+	ll    *list.List
 	cache map[string]*list.Element
 	// 当前已使用的内存
 	nbytes int64
@@ -15,14 +19,13 @@ type Cache struct {
 	OnEvicted func(key string, value Value)
 }
 
-
 /*
 	键值对 entry 是双向链表节点的数据类型，
 	在链表中仍保存每个值对应的 key 的好处在于，
 	淘汰队尾节点时，需要用 key 从字典中删除对应的映射。
 */
 type entry struct {
-	key string
+	key   string
 	value Value
 }
 
@@ -34,9 +37,9 @@ type Value interface {
 
 func New(maxBytes int64, onEvicted func(string, Value)) *Cache {
 	return &Cache{
-		ll: list.New(),
-		cache: make(map[string]*list.Element),
-		maxBytes: maxBytes,
+		ll:        list.New(),
+		cache:     make(map[string]*list.Element),
+		maxBytes:  maxBytes,
 		OnEvicted: onEvicted,
 	}
 }
@@ -96,4 +99,3 @@ func (c *Cache) Add(key string, value Value) {
 func (c *Cache) Len() int {
 	return c.ll.Len()
 }
-
