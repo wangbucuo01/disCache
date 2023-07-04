@@ -25,6 +25,7 @@ func (v ByteView) String() string {
 	return string(v.b)
 }
 
+// byte数组的拷贝方法
 func cloneBytes(b []byte) []byte {
 	c := make([]byte, len(b))
 	copy(c, b)
