@@ -1,5 +1,7 @@
 package disCache
 
+import pb "disCache/discachepb"
+
 // 分布式节点 通信 获取缓存值
 /*
 使用一致性哈希选择节点
@@ -17,6 +19,7 @@ type PeerPicker interface {
 
 // 获取对应节点的缓存值
 type PeerGetter interface {
-	Get(group string, key string) ([]byte, error)
+	// Get(group string, key string) ([]byte, error)
+	Get(in *pb.Request, out *pb.Response) error
 }
 
