@@ -39,7 +39,8 @@ type Group struct {
 	// 并发缓存
 	mainCache cache
 	peers     PeerPicker
-	loader    *singleflight.Group
+	// 管理不同key的请求
+	loader *singleflight.Group
 }
 
 var (

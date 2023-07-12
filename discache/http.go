@@ -21,11 +21,13 @@ const (
 	defaultReplicas = 50
 )
 
+// HTTP服务端
 type HTTPPool struct {
 	self     string //记录自己的地址 包括主机名IP和端口
 	basePath string //节点间通讯地址的前缀
 	mu       sync.Mutex
-	peers    *consistenthash.Map
+	// 用来根据一致性哈希算法选择节点
+	peers *consistenthash.Map
 	// 映射远程节点与对应的 httpGetter。每一个远程节点对应一个 httpGetter，因为 httpGetter 与远程节点的地址 baseURL 有关。
 	httpGetters map[string]*httpGetter
 }
@@ -58,12 +60,14 @@ func (p *HTTPPool) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	groupName := parts[0]
 	key := parts[1]
+	// 根据groupName获取对应的group
 	group := GetGroup(groupName)
 	if group == nil {
 		http.Error(w, "no such group: "+groupName, http.StatusNotFound)
 		return
 	}
 
+	// 获取缓存值
 	view, err := group.Get(key)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
