@@ -6,10 +6,11 @@ import "container/list"
  LRU缓存淘汰策略
 */
 
-// list.List实现了一个双向链表
 // Cache底层是一个双向链表+map
 type Cache struct {
-	ll    *list.List
+	// list.List实现了一个双向链表
+	ll *list.List
+	// map key对应list中的value
 	cache map[string]*list.Element
 	// 当前已使用的内存
 	nbytes int64
@@ -51,9 +52,9 @@ func New(maxBytes int64, onEvicted func(string, Value)) *Cache {
 */
 func (c *Cache) Get(key string) (value Value, ok bool) {
 	if ele, ok := c.cache[key]; ok {
-		// 1. 找这个值
+		// 1. 找这个值，转成entry类型
 		kv := ele.Value.(*entry)
-		// 2. 后移
+		// 2. 移到队首
 		c.ll.MoveToFront(ele)
 		return kv.value, true
 	}

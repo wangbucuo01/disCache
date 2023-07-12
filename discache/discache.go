@@ -18,23 +18,21 @@ import (
 			否 -> 调用回调函数，获取值，返回，并添加到缓存（3）
 */
 
-// 回调函数
+// 回调函数：缓存不存在时，需要从数据源（文件/数据库等）获取数据并加到缓存。我们设置一个统一的回调函数，不去考虑从哪个数据源获取数据，而是交给用户决定，当缓存不存在时，调用这个函数，得到源数据。
 type Getter interface {
 	Get(key string) ([]byte, error)
 }
 
-// 函数类型实现Getter接口，称为接口型函数，
-// 方便使用者在调用时既能够传入函数作为参数，也能够传入实现了该接口的结构体作为参数
+// 函数类型实现Getter接口，称为接口型函数，方便使用者在调用时既能够传入函数作为参数，也能够传入实现了该接口的结构体作为参数
 type GetterFunc func(key string) ([]byte, error)
 
 func (f GetterFunc) Get(key string) ([]byte, error) {
 	return f(key)
 }
 
-// 核心数据结构 Group
-// 一个缓存的命名空间
+// 核心数据结构 Group：一个缓存的命名空间
 type Group struct {
-	// 唯一的命名
+	// 命名空间的唯一命名
 	name string
 	// 缓存未命中时获取数据源的回调（callback）
 	getter Getter
@@ -66,6 +64,7 @@ func NewGroup(name string, cacheBytes int64, getter Getter) *Group {
 	return g
 }
 
+// 获取特定名称的Group
 func GetGroup(name string) *Group {
 	mu.RLock()
 	g := groups[name]
@@ -73,7 +72,7 @@ func GetGroup(name string) *Group {
 	return g
 }
 
-// Get方法
+// Get方法获取缓存值
 func (g *Group) Get(key string) (ByteView, error) {
 	if key == "" {
 		return ByteView{}, fmt.Errorf("key is required")
@@ -89,6 +88,7 @@ func (g *Group) Get(key string) (ByteView, error) {
 	return g.load(key)
 }
 
+// 缓存不存在获取源数据
 func (g *Group) load(key string) (value ByteView, err error) {
 	viewi, err := g.loader.Do(key, func() (interface{}, error) {
 		if g.peers != nil {
@@ -112,7 +112,7 @@ func (g *Group) load(key string) (value ByteView, err error) {
 func (g *Group) getFromPeer(peer PeerGetter, key string) (ByteView, error) {
 	req := &pb.Request{
 		Group: g.name,
-		Key: key,
+		Key:   key,
 	}
 	res := &pb.Response{}
 	err := peer.Get(req, res)
